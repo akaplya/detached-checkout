@@ -45,8 +45,7 @@ class Collection extends \Magento\Quote\Model\ResourceModel\Quote\Item\Collectio
      */
     protected function _afterLoad(): self
     {
-        parent::_afterLoad();
-
+        \Magento\Framework\Model\ResourceModel\Db\VersionControl\Collection::_afterLoad();
         $productIds = [];
         foreach ($this as $item) {
             // Assign parent items

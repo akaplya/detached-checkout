@@ -38,9 +38,15 @@ class Item
 
     public function aroundGetProduct(Subject $subject, \Closure $proceed)
     {
-        return $this->productHydrator->hydrate(
-            $this->jsonSerializer->unserialize($subject->getProductView())
-        );
+        if (!empty($subject->getData('product')) && ($subject->getData('product') instanceof Product)) {
+            $product = $subject->getData('product');
+        } else {
+            $product = $this->productHydrator->hydrate(
+                $this->jsonSerializer->unserialize($subject->getProductView())
+            );
+        }
+        return $product;
+
     }
 
 }
