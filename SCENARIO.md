@@ -207,7 +207,7 @@ mutation {
 mutation {
   placeOrder(
     input: {
-      cart_id: "fa67c95ddb4942ada5df503fa91d3db2"
+      cart_id: "fa67c95ddb4942ada5df503fa91d3db3"
     }
   ) {
     orderV2 {
