@@ -22,5 +22,8 @@
         </arguments>
     </type>
     <preference for="Magento\Quote\Model\ResourceModel\Quote\Item\Collection" type="CommerceOptimizer\Checkout\Plugin\Quote\Model\ResourceModel\Quote\Item\Collection" />
-
+    <type name="Magento\Catalog\Model\Product">
+<!-- Prevents product from reloading during shopping cart rule processing -->
+        <plugin name="avoid-load" type="CommerceOptimizer\Checkout\Plugin\Catalog\Model\Product"/>
+    </type>
 </config>

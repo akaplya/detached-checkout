@@ -5,15 +5,19 @@ namespace CommerceOptimizer\Checkout\Model;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status as ProductStatus;
 use Magento\Catalog\Model\ProductFactory;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 
 class ProductHydrator
 {
     private ProductFactory $productFactory;
+    private ScopeConfigInterface $config;
 
     public function __construct(
-        ProductFactory $productFactory
+        ProductFactory $productFactory,
+        ScopeConfigInterface $config
     ){
         $this->productFactory = $productFactory;
+        $this->config = $config;
     }
 
     /**
@@ -30,8 +34,14 @@ class ProductHydrator
         $product->setTypeId("simple");
         $product->setSku($data['sku']);
         $product->setId(time());
-        $product->setTaxClassId(2);
+        $defaultTaxClassId = $this->config->getValue(\Magento\Tax\Helper\Data::CONFIG_DEFAULT_PRODUCT_TAX_CLASS);
+        $product->setTaxClassId($defaultTaxClassId);
         $product->setStatus(ProductStatus::STATUS_ENABLED);
+        if (isset($data['attributes'])) {
+            foreach ($data['attributes'] as $attribute) {
+                $product->setData($attribute['name'], $attribute['value']);
+            }
+        }
         return $product;
     }
 }

@@ -10,7 +10,7 @@ class ProductProvider
             'base_uri' => 'https://catalog-service.adobe.io'
         ]);
 
-        $body = '{"query":"query getProduct($skus: [String]){products(skus: $skus) { __typename shortDescription name sku ... on SimpleProductView {price {regular {amount {value}} final{amount{value}}}}}}","variables":{"skus":'
+        $body = '{"query":"query getProduct($skus: [String]){products(skus: $skus) { __typename shortDescription name sku attributes {roles name value} ... on SimpleProductView {price {regular {amount {value}} final{amount{value}}}}}}","variables":{"skus":'
             . json_encode(array_values($skus))
             . '},"operationName":"getProduct"}';
         $options = [
