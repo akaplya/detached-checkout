@@ -30,6 +30,7 @@ class ProductHydrator
         $product->setTypeId("simple");
         $product->setSku($data['sku']);
         $product->setId(time());
+        $product->setTaxClassId(2);
         $product->setStatus(ProductStatus::STATUS_ENABLED);
         return $product;
     }
