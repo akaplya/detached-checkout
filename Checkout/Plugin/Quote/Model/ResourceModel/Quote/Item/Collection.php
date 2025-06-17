@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * Copyright 2025 Adobe
+ * All Rights Reserved.
+ */
 namespace CommerceOptimizer\Checkout\Plugin\Quote\Model\ResourceModel\Quote\Item;
 
 use Magento\Catalog\Api\Data\ProductInterface;

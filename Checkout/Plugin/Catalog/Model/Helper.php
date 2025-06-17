@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * Copyright 2025 Adobe
+ * All Rights Reserved.
+ */
 namespace CommerceOptimizer\Checkout\Plugin\Catalog\Model;
 
 use Magento\Catalog\Helper\Product as Subject;
