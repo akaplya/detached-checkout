@@ -13,22 +13,19 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class Runtime
 {
+    private static string $runtimeStoreCode;
     private static array $runtimeStore;
-    private StoreCookieManagerInterface $storeCookieManager;
     private Http $request;
     private ResourceConnection $resourceConnection;
 
     /**
-     * @param StoreCookieManagerInterface $storeCookieManager
      * @param ResourceConnection $resourceConnection
      * @param Http $request
      */
     public function __construct(
-        StoreCookieManagerInterface $storeCookieManager,
         ResourceConnection $resourceConnection,
         Http $request
     ) {
-        $this->storeCookieManager = $storeCookieManager;
         $this->request = $request;
         $this->resourceConnection = $resourceConnection;
     }
@@ -96,16 +93,16 @@ class Runtime
     /**
      * @return string
      */
-    private function getStoreCodeFromRequest(): string
+    public function getStoreCodeFromRequest(): string
     {
-        $storeCode = 'admin';
-        if ($this->request->getHeader('Store')) {
-            $storeCode = $this->request->getHeader('Store');
-        } elseif ($this->request->getParam(StoreManagerInterface::PARAM_NAME,
-            $this->storeCookieManager->getStoreCodeFromCookie()
-        )) {
-            $storeCode = $this->request->getHeader('Store');
+        if (!isset(self::$runtimeStoreCode)) {
+            $storeCode = 'admin';
+            if ($this->request->getHeader('Store')) {
+                $storeCode = $this->request->getHeader('Store');
+            }
+            self::$runtimeStoreCode = $storeCode;
         }
-        return $storeCode;
+
+        return self::$runtimeStoreCode;
     }
 }

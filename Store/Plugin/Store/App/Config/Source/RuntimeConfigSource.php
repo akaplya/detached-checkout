@@ -120,6 +120,10 @@ class RuntimeConfigSource extends \Magento\Store\App\Config\Source\RuntimeConfig
 
         foreach ($entities as $entity) {
             $data[$entity[$keyField]] = $entity;
+            if ($table == 'store_website') {
+                $data[$entity[$keyField]]['is_default'] = '1';
+            }
+
         }
 
         return $data;

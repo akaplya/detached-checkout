@@ -9,28 +9,29 @@ class ProductProvider
 {
     public function get(array $skus): array
     {
+        $tenantId = 'KZrr4s3gAAbumMGicqrvVo';
         $httpClient = new \GuzzleHttp\Client([
-            'base_uri' => 'https://catalog-service.adobe.io'
+            'base_uri' => 'https://na1-sandbox.api.commerce.adobe.com'
         ]);
 
         $body = '{"query":"query getProduct($skus: [String]){products(skus: $skus) { __typename shortDescription name sku attributes {roles name value} ... on SimpleProductView {price {regular {amount {value}} final{amount{value}}}}}}","variables":{"skus":'
             . json_encode(array_values($skus))
             . '},"operationName":"getProduct"}';
         $options = [
+
             'headers' => [
                 'Content-Type' => 'application/json',
-                'Magento-Environment-Id' => 'f38a0de0-764b-41fa-bd2c-5bc2f3c7b39a',
-                'Magento-Store-Code' => 'main_website_store',
-                'Magento-Store-View-Code' => 'default',
-                'Magento-Website-Code' => 'base',
-                'x-api-key' => '4dfa19c9fe6f4cccade55cc5b3da94f7'
+                'ac-channel-id' => 'c0780d24-00b0-4236-bc31-ba586d3e7f0b',
+                'ac-environment-id' => $tenantId,
+                'ac-price-book-id' => 'west_coast_inc',
+                'ac-scope-locale' => 'en-US'
             ],
             'body' => $body
         ];
 
         $response = $httpClient->request(
             'POST',
-            '/graphql',
+            $tenantId . '/graphql',
             $options
         );
         $output = [];
