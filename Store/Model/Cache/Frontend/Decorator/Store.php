@@ -1,28 +1,39 @@
 <?php
-/**
- * Copyright 2025 Adobe
- * All Rights Reserved.
- */
+
 namespace CommerceOptimizer\Store\Model\Cache\Frontend\Decorator;
 
 use CommerceOptimizer\Store\Model\Runtime;
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Cache\FrontendInterface;
+use Magento\Framework\DB\Adapter\Pdo\Mysql;
 
 class Store extends \Magento\Framework\Cache\Frontend\Decorator\Bare
 {
 
     private Runtime $runtime;
+    private array $systemIdentifiers = [];
 
-    public function __construct(\Magento\Framework\Cache\FrontendInterface $frontend, Runtime $runtime)
+
+    public function __construct(FrontendInterface $frontend, Runtime $runtime, array $systemIdentifiers)
     {
         parent::__construct($frontend);
         $this->runtime = $runtime;
+        $this->systemIdentifiers = $systemIdentifiers;
     }
 
     private function resolveRuntimeIdentifier($identifier)
     {
-        return $this->runtime->getStoreCodeFromRequest() . '[::::]' . $identifier;
-
+        if (!isset($this->systemIdentifiers[$identifier])
+            && (strtoupper(substr($identifier, 0, 16)) != Mysql::DDL_CACHE_PREFIX)
+        ) {
+            /** @var \Psr\Log\LoggerInterface $logger */
+//            $logger = ObjectManager::getInstance()->get(\Psr\Log\LoggerInterface::class);
+//            $logger->critical($identifier);
+            $identifier = $this->runtime->getStoreCodeFromRequest() . '[::::]' . $identifier;
+        }
+        return $identifier;
     }
+
     public function load($identifier)
     {
         return parent::load($this->resolveRuntimeIdentifier($identifier));

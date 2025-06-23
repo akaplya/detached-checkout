@@ -5,19 +5,51 @@
  * All Rights Reserved.
  */
 -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <type name="Magento\Store\Model\Config\Processor\Fallback">
         <arguments>
-            <argument name="storeResource" xsi:type="object">CommerceOptimizer\Store\Plugin\Store\Model\ResourceModel\Store</argument>
-            <argument name="websiteResource" xsi:type="object">CommerceOptimizer\Store\Plugin\Store\Model\ResourceModel\Website</argument>
+            <argument name="storeResource" xsi:type="object">
+                CommerceOptimizer\Store\Plugin\Store\Model\ResourceModel\Store
+            </argument>
+            <argument name="websiteResource" xsi:type="object">
+                CommerceOptimizer\Store\Plugin\Store\Model\ResourceModel\Website
+            </argument>
         </arguments>
     </type>
-    <preference for="Magento\Store\App\Config\Source\RuntimeConfigSource" type="CommerceOptimizer\Store\Plugin\Store\App\Config\Source\RuntimeConfigSource" />
+    <preference for="Magento\Store\App\Config\Source\RuntimeConfigSource"
+                type="CommerceOptimizer\Store\Plugin\Store\App\Config\Source\RuntimeConfigSource"/>
     <type name="Magento\Framework\App\Cache\Frontend\Factory">
         <arguments>
             <argument name="decorators" xsi:type="array">
                 <item name="store" xsi:type="array">
-                    <item name="class" xsi:type="string">CommerceOptimizer\Store\Model\Cache\Frontend\Decorator\Store</item>
+                    <item name="class" xsi:type="string">CommerceOptimizer\Store\Model\Cache\Frontend\Decorator\Store
+                    </item>
+                    <item name="parameters" xsi:type="array">
+                        <item name="systemIdentifiers" xsi:type="array">
+                            <item name="graphql::DiConfig" xsi:type="string">graphql::DiConfig</item>
+                            <item name="global|primary|plugin-list" xsi:type="string">global|primary|plugin-list</item>
+                            <item name="global|primary|graphql|plugin-list" xsi:type="string">global|primary|graphql|plugin-list</item>
+                            <item name="system_default" xsi:type="string">system_default</item>
+                            <item name="initial_config" xsi:type="string">initial_config</item>
+                            <item name="cron_groups_config_cache" xsi:type="string">cron_groups_config_cache</item>
+                            <item name="global::event_config_cache" xsi:type="string">global::event_config_cache</item>
+                            <item name="system" xsi:type="string">system</item>
+                            <item name="mage-version" xsi:type="string">mage-version</item>
+                            <item name="extension_attributes_config" xsi:type="string">extension_attributes_config</item>
+                            <item name="adminhtml::backend_system_configuration_structure" xsi:type="string">adminhtml::backend_system_configuration_structure</item>
+                            <item name="graphql::resourcesCache" xsi:type="string">graphql::resourcesCache</item>
+                            <item name="logging_config" xsi:type="string">logging_config</item>
+                            <item name="communication_config_cache" xsi:type="string">communication_config_cache</item>
+                            <item name="webapi_async_config" xsi:type="string">webapi_async_config</item>
+                            <item name="webapi_config" xsi:type="string">webapi_config</item>
+                            <item name="ui_component_configuration_definition_data" xsi:type="string">ui_component_configuration_definition_data</item>
+                            <item name="frontend::RoutesConfig" xsi:type="string">frontend::RoutesConfig</item>
+                            <item name="constraint_config_cache" xsi:type="string">constraint_config_cache</item>
+                            <item name="Magento_Framework_GraphQlSchemaStitching_Config_Data" xsi:type="string">Magento_Framework_GraphQlSchemaStitching_Config_Data</item>
+                            <item name="graphql::event_config_cache" xsi:type="string">graphql::event_config_cache</item>
+                        </item>
+                    </item>
                 </item>
                 <item name="tag" xsi:type="array">
                     <item name="class" xsi:type="string">Magento\Framework\Cache\Frontend\Decorator\TagScope</item>
