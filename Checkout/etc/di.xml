@@ -26,4 +26,11 @@
 <!-- Prevents product from reloading during shopping cart rule processing -->
         <plugin name="avoid-load" type="CommerceOptimizer\Checkout\Plugin\Catalog\Model\Product"/>
     </type>
+<!--    \Magento\InventorySales\Plugin\Sales\OrderManagement\AppendReservationsAfterOrderPlacementPlugin-->
+    <type name="Magento\Sales\Api\OrderManagementInterface">
+        <plugin name="inventory_reservations_placement" disabled="true"/>
+    </type>
+    <type name="Magento\InventorySalesApi\Api\GetStockBySalesChannelInterface">
+        <plugin name="adapt_stock_resolver_to_admin_website" disabled="true"/>
+    </type>
 </config>
