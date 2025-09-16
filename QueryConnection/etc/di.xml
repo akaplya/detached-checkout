@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright 2025 Adobe
+ * All Rights Reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="comopt_config_set" xsi:type="object">CommerceOptimizer\QueryConnection\Console\Command\ConfigSetCommand</item>
+                <item name="comopt_config_get" xsi:type="object">CommerceOptimizer\QueryConnection\Console\Command\ConfigGetCommand</item>
+            </argument>
+        </arguments>
+    </type>
+</config>
+

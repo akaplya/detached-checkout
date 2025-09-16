@@ -33,4 +33,9 @@
     <type name="Magento\InventorySalesApi\Api\GetStockBySalesChannelInterface">
         <plugin name="adapt_stock_resolver_to_admin_website" disabled="true"/>
     </type>
+    <type name="CommerceOptimizer\Checkout\Model\Http\ProductProvider">
+        <arguments>
+            <argument name="acoConfig" xsi:type="object">CommerceOptimizer\QueryConnection\Model\AcoConfig</argument>
+        </arguments>
+    </type>
 </config>

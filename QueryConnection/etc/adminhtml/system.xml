@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright 2025 Adobe
+ * All Rights Reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="comopt">
+            <label>Commerce Optimizer</label>
+            <tab>commerce</tab>
+            <resource>CommerceOptimizer_QueryConnection::config</resource>
+            <group id="settings">
+                <label>Settings</label>
+                <group id="aco">
+                    <label>Adobe Commerce Optimizer</label>
+                    <group id="connection">
+                        <label>Connection Settings</label>
+                        <field id="base_uri" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Base URI</label>
+                            <comment>Base URI for Adobe Commerce Optimizer API</comment>
+                            <config_path>comopt/settings/aco/connection/base_uri</config_path>
+                        </field>
+                        <field id="ac_channel_id" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>AC Channel ID</label>
+                            <comment>Adobe Commerce Channel ID</comment>
+                            <config_path>comopt/settings/aco/connection/ac_channel_id</config_path>
+                        </field>
+                        <field id="ac_environment_id" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>AC Environment ID</label>
+                            <comment>Adobe Commerce Environment ID</comment>
+                            <config_path>comopt/settings/aco/connection/ac_environment_id</config_path>
+                        </field>
+                        <field id="ac_price_book_id" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>AC Price Book ID</label>
+                            <comment>Adobe Commerce Price Book ID</comment>
+                            <config_path>comopt/settings/aco/connection/ac_price_book_id</config_path>
+                        </field>
+                        <field id="ac_scope_locale" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>AC Scope Locale</label>
+                            <comment>Adobe Commerce Scope Locale</comment>
+                            <config_path>comopt/settings/aco/connection/ac_scope_locale</config_path>
+                        </field>
+                    </group>
+                </group>
+            </group>
+        </section>
+    </system>
+</config>
+

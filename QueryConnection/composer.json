@@ -1,11 +1,10 @@
 {
-    "name": "commerce-optimizer/module-checkout",
+    "name": "commerce-optimizer/module-query-connection",
     "description": "N/A",
     "require": {
         "php": "~8.1.0||~8.2.0||~8.3.0",
         "magento/framework": "*",
-        "magento/module-quote": "*",
-        "magento/module-catalog-inventory": "*"
+        "magento/module-config": "*"
     },
     "type": "magento2-module",
     "license": [
@@ -17,7 +16,7 @@
             "registration.php"
         ],
         "psr-4": {
-            "CommerceOptimizer\\Checkout\\": ""
+            "CommerceOptimizer\\QueryConnection\\": ""
         }
     }
 }

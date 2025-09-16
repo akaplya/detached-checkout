@@ -5,33 +5,48 @@
  */
 namespace CommerceOptimizer\Checkout\Model\Http;
 
+use CommerceOptimizer\QueryConnection\Model\AcoConfig;
+
 class ProductProvider
 {
+    /**
+     * @var AcoConfig
+     */
+    private $acoConfig;
+
+    /**
+     * @param AcoConfig $acoConfig
+     */
+    public function __construct(AcoConfig $acoConfig)
+    {
+        $this->acoConfig = $acoConfig;
+    }
+
     public function get(array $skus): array
     {
-        $tenantId = 'KZrr4s3gAAbumMGicqrvVo';
+        $settings = $this->acoConfig->getAllSettings();
+        
         $httpClient = new \GuzzleHttp\Client([
-            'base_uri' => 'https://na1-sandbox.api.commerce.adobe.com'
+            'base_uri' => $settings['base_uri']
         ]);
 
         $body = '{"query":"query getProduct($skus: [String]){products(skus: $skus) { __typename shortDescription name sku attributes {roles name value} ... on SimpleProductView {price {regular {amount {value}} final{amount{value}}}}}}","variables":{"skus":'
             . json_encode(array_values($skus))
             . '},"operationName":"getProduct"}';
         $options = [
-
             'headers' => [
                 'Content-Type' => 'application/json',
-                'ac-channel-id' => 'c0780d24-00b0-4236-bc31-ba586d3e7f0b',
-                'ac-environment-id' => $tenantId,
-                'ac-price-book-id' => 'west_coast_inc',
-                'ac-scope-locale' => 'en-US'
+                'ac-channel-id' => $settings['ac_channel_id'],
+                'ac-environment-id' => $settings['ac_environment_id'],
+                'ac-price-book-id' => $settings['ac_price_book_id'],
+                'ac-scope-locale' => $settings['ac_scope_locale']
             ],
             'body' => $body
         ];
 
         $response = $httpClient->request(
             'POST',
-            $tenantId . '/graphql',
+            $settings['ac_environment_id'] . '/graphql',
             $options
         );
         $output = [];
