@@ -6,15 +6,27 @@
 namespace CommerceOptimizer\QueryConnection\Model;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Store\Model\ScopeInterface;
 
 class AcoConfig
 {
-    private const XML_PATH_BASE_URI = 'comopt/settings/aco/connection/base_uri';
-    private const XML_PATH_AC_CHANNEL_ID = 'comopt/settings/aco/connection/ac_channel_id';
-    private const XML_PATH_AC_ENVIRONMENT_ID = 'comopt/settings/aco/connection/ac_environment_id';
-    private const XML_PATH_AC_PRICE_BOOK_ID = 'comopt/settings/aco/connection/ac_price_book_id';
-    private const XML_PATH_AC_SCOPE_LOCALE = 'comopt/settings/aco/connection/ac_scope_locale';
+    public const BASE_URI = 'base_uri';
+    public const CHANNEL_ID = 'ac_channel_id';
+    public const ENVIRONMENT_ID = 'ac_environment_id';
+    public const PRICE_BOOK_ID = 'ac_price_book_id';
+    public const SCOPE_LOCALE = 'ac_scope_locale';
+    public const XML_PATH_BASE_URI = 'comopt/settings/aco/connection/base_uri';
+    public const XML_PATH_AC_CHANNEL_ID = 'comopt/settings/aco/connection/ac_channel_id';
+    public const XML_PATH_AC_ENVIRONMENT_ID = 'comopt/settings/aco/connection/ac_environment_id';
+    public const XML_PATH_AC_PRICE_BOOK_ID = 'comopt/settings/aco/connection/ac_price_book_id';
+    public const XML_PATH_AC_SCOPE_LOCALE = 'comopt/settings/aco/connection/ac_scope_locale';
+
+    public static array $configMap = [
+        self::BASE_URI => self::XML_PATH_BASE_URI,
+        self::CHANNEL_ID => self::XML_PATH_AC_CHANNEL_ID,
+        self::ENVIRONMENT_ID => self::XML_PATH_AC_ENVIRONMENT_ID,
+        self::PRICE_BOOK_ID => self::XML_PATH_AC_PRICE_BOOK_ID,
+        self::SCOPE_LOCALE => AcoConfig::XML_PATH_AC_SCOPE_LOCALE
+    ];
 
     /**
      * @var ScopeConfigInterface
@@ -99,12 +111,11 @@ class AcoConfig
     public function getAllSettings(string $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT, int $scopeId = 0): array
     {
         return [
-            'base_uri' => $this->getBaseUri($scope, $scopeId),
-            'ac_channel_id' => $this->getAcChannelId($scope, $scopeId),
-            'ac_environment_id' => $this->getAcEnvironmentId($scope, $scopeId),
-            'ac_price_book_id' => $this->getAcPriceBookId($scope, $scopeId),
-            'ac_scope_locale' => $this->getAcScopeLocale($scope, $scopeId)
+            self::BASE_URI => $this->getBaseUri($scope, $scopeId),
+            self::CHANNEL_ID => $this->getAcChannelId($scope, $scopeId),
+            self::ENVIRONMENT_ID => $this->getAcEnvironmentId($scope, $scopeId),
+            self::PRICE_BOOK_ID => $this->getAcPriceBookId($scope, $scopeId),
+            self::SCOPE_LOCALE => $this->getAcScopeLocale($scope, $scopeId)
         ];
     }
 }
-

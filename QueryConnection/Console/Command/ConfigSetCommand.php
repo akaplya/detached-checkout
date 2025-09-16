@@ -5,17 +5,18 @@
  */
 namespace CommerceOptimizer\QueryConnection\Console\Command;
 
+use CommerceOptimizer\QueryConnection\Model\AcoConfig;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Config\Storage\WriterInterface;
+use Magento\Store\Model\ScopeInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Magento\Framework\App\Config\Storage\WriterInterface;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Store\Model\ScopeInterface;
 
 class ConfigSetCommand extends Command
 {
-    private const PATH_OPTION = 'path';
+    private const KEY_OPTION = 'key';
     private const VALUE_OPTION = 'value';
     private const SCOPE_OPTION = 'scope';
     private const SCOPE_ID_OPTION = 'scope-id';
@@ -45,10 +46,10 @@ class ConfigSetCommand extends Command
         $this->setName('comopt:config:set')
             ->setDescription('Set Commerce Optimizer configuration values')
             ->addOption(
-                self::PATH_OPTION,
+                self::KEY_OPTION,
                 'p',
                 InputOption::VALUE_REQUIRED,
-                'Configuration path (e.g., comopt/settings/aco/connection/base_uri)'
+                'Configuration settings (e.g., base_uri)'
             )
             ->addOption(
                 self::VALUE_OPTION,
@@ -79,22 +80,19 @@ class ConfigSetCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $path = $input->getOption(self::PATH_OPTION);
+        $key = $input->getOption(self::KEY_OPTION);
         $value = $input->getOption(self::VALUE_OPTION);
         $scope = $input->getOption(self::SCOPE_OPTION);
         $scopeId = (int)$input->getOption(self::SCOPE_ID_OPTION);
 
-        if (!$path || !$value) {
+        if (!$key || !$value) {
             $output->writeln('<error>Both path and value are required</error>');
             return Command::FAILURE;
         }
-
-        // Validate path starts with comopt
-        if (!str_starts_with($path, 'comopt/')) {
-            $output->writeln('<error>Path must start with "comopt/"</error>');
+        if (!in_array($key, [AcoConfig::BASE_URI, AcoConfig::CHANNEL_ID, AcoConfig::ENVIRONMENT_ID, AcoConfig::PRICE_BOOK_ID, AcoConfig::SCOPE_LOCALE])) {
+            $output->writeln('<error>Invalid settings</error>');
             return Command::FAILURE;
         }
-
         // Validate scope
         $allowedScopes = [
             ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
@@ -107,11 +105,11 @@ class ConfigSetCommand extends Command
         }
 
         try {
-            $this->configWriter->save($path, $value, $scope, $scopeId);
+            $this->configWriter->save(AcoConfig::$configMap[$key], $value, $scope, $scopeId);
             $output->writeln(
                 sprintf(
                     '<info>Configuration saved: %s = %s (scope: %s, scope-id: %d)</info>',
-                    $path,
+                    AcoConfig::$configMap[$key],
                     $value,
                     $scope,
                     $scopeId

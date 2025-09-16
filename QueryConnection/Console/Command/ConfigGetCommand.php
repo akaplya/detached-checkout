@@ -5,6 +5,7 @@
  */
 namespace CommerceOptimizer\QueryConnection\Console\Command;
 
+use CommerceOptimizer\QueryConnection\Model\AcoConfig;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -14,7 +15,7 @@ use Magento\Store\Model\ScopeInterface;
 
 class ConfigGetCommand extends Command
 {
-    private const PATH_OPTION = 'path';
+    private const KEY_OPTION = 'key';
     private const SCOPE_OPTION = 'scope';
     private const SCOPE_ID_OPTION = 'scope-id';
 
@@ -43,10 +44,10 @@ class ConfigGetCommand extends Command
         $this->setName('comopt:config:get')
             ->setDescription('Get Commerce Optimizer configuration values')
             ->addOption(
-                self::PATH_OPTION,
-                'p',
+                self::KEY_OPTION,
+                'k',
                 InputOption::VALUE_OPTIONAL,
-                'Configuration path (e.g., comopt/settings/aco/connection/base_uri). If not provided, shows all ACO connection settings.'
+                'Configuration key (e.g., base_uri). If not provided, shows all ACO connection settings.'
             )
             ->addOption(
                 self::SCOPE_OPTION,
@@ -71,7 +72,7 @@ class ConfigGetCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $path = $input->getOption(self::PATH_OPTION);
+        $path = $input->getOption(self::KEY_OPTION);
         $scope = $input->getOption(self::SCOPE_OPTION);
         $scopeId = (int)$input->getOption(self::SCOPE_ID_OPTION);
 
@@ -99,11 +100,11 @@ class ConfigGetCommand extends Command
             } else {
                 // Show all ACO connection settings
                 $settings = [
-                    'comopt/settings/aco/connection/base_uri' => 'Base URI',
-                    'comopt/settings/aco/connection/ac_channel_id' => 'AC Channel ID',
-                    'comopt/settings/aco/connection/ac_environment_id' => 'AC Environment ID',
-                    'comopt/settings/aco/connection/ac_price_book_id' => 'AC Price Book ID',
-                    'comopt/settings/aco/connection/ac_scope_locale' => 'AC Scope Locale'
+                    AcoConfig::XML_PATH_BASE_URI => 'Base URI',
+                    AcoConfig::XML_PATH_AC_CHANNEL_ID => 'AC Channel ID',
+                    AcoConfig::XML_PATH_AC_ENVIRONMENT_ID => 'AC Environment ID',
+                    AcoConfig::XML_PATH_AC_PRICE_BOOK_ID => 'AC Price Book ID',
+                    AcoConfig::XML_PATH_AC_SCOPE_LOCALE => 'AC Scope Locale'
                 ];
 
                 $output->writeln('<info>ACO Connection Settings:</info>');
@@ -122,4 +123,3 @@ class ConfigGetCommand extends Command
         }
     }
 }
-

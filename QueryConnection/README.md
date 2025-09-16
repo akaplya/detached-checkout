@@ -64,26 +64,26 @@ ACO Connection Settings:
 ```bash
 # Set base URI
 bin/magento comopt:config:set \
-  --path comopt/settings/aco/connection/base_uri \
+  --key base_uri \
   --value "https://na1-sandbox.api.commerce.adobe.com"
 
 # Set environment ID
 bin/magento comopt:config:set \
-  --path comopt/settings/aco/connection/ac_environment_id \
+  --key ac_environment_id \
   --value "KZrr4s3gAAbumMGicqrvVo"
 
 # Set channel ID
 bin/magento comopt:config:set \
-  --path comopt/settings/aco/connection/ac_channel_id \
+  --key ac_channel_id \
   --value "c0780d24-00b0-4236-bc31-ba586d3e7f0b"
 
 # Set price book ID
 bin/magento comopt:config:set \
-  --path comopt/settings/aco/connection/ac_price_book_id \
+  --key ac_price_book_id \
   --value "west_coast_inc"
 
 # Set locale
 bin/magento comopt:config:set \
-  --path comopt/settings/aco/connection/ac_scope_locale \
+  --key ac_scope_locale \
   --value "en-US"
 ```
