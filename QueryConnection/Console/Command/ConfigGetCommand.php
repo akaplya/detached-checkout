@@ -30,7 +30,7 @@ class ConfigGetCommand extends Command
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        string $name = null
+        ?string $name = null
     ) {
         $this->scopeConfig = $scopeConfig;
         parent::__construct($name);

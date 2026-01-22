@@ -32,7 +32,7 @@ class ConfigSetCommand extends Command
      */
     public function __construct(
         WriterInterface $configWriter,
-        string $name = null
+        ?string $name = null
     ) {
         $this->configWriter = $configWriter;
         parent::__construct($name);
