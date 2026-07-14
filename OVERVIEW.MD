@@ -126,3 +126,23 @@ The reload option's whole idea — "this SKU can be asked about again" — doesn
 ### 5.5 Why expiration is re-evaluated on read, not on a timer
 
 Checking whether something has expired right when the cart is loaded — instead of on some scheduled background job — means a shopper never ends up seeing data that's stale for longer than intended just because of how often that background job happens to run; the check is exactly as fresh as the last time anyone actually looked at the cart. It also means expiration doesn't depend on some separate scheduled process being set up correctly and actually running — it's just a natural part of reading the cart at all, which fits how much of this module's other behavior (Section 3) is already built around "do the right thing the moment something is read," instead of relying on a separate maintenance job running in the background.
+
+## 6. Tax and Shipping — Riding on Adobe Commerce's Own Calculation, Unmodified
+
+Section 4.7 already made one promise about the tradeoff bundles make: "every line in it is just an ordinary cart item for pricing, tax, and order purposes." This section spells out what that promise actually costs once real tax rules and real shipping methods are pointed at a decomposed bundle.
+
+### 6.1 There is no bundle-aware tax or shipping code at all
+
+This is worth stating plainly instead of leaving it implied: nothing in this module plugs into Adobe Commerce's Tax module or its shipping-rate calculation. Every hydrated product — whether it's a genuine standalone simple product or one piece of a decomposed bundle — goes through the same product hydrator, and that hydrator does exactly two tax/shipping-relevant things: it sets the product's tax class to the store's configured *default product tax class* as a baseline, then replays whatever ACO sent back as generic product attributes on top of it — so a component that ACO describes with its own `tax_class_id` attribute gets that value instead of the default, the same generic passthrough that carries over any other ACO attribute. It never sets a weight at all, though, under any circumstance. Adobe Commerce's own Tax and Shipping modules then run completely untouched on top of whatever quote items they're handed. That's a deliberate consequence of Section 4.6's design, not an oversight: once a bundle's pieces are "just ordinary cart items," the only honest thing to do is let ordinary cart-item logic — tax and shipping included — apply to them exactly as it would to anything else, rather than quietly special-casing them somewhere no one would think to look.
+
+### 6.2 What that means for tax
+
+Because every decomposed piece is its own line with its own price snapshot (Section 4.6), Adobe Commerce computes tax the same way it would for any ordinary multi-item cart: rate × price × qty, per line, then summed. In the build-your-own-pizza example used throughout the scenario docs, only the size selection actually carries a non-zero price — crust, sauce, cheese, and topping all come back from ACO priced at zero — so in practice tax ends up computed against whichever pieces ACO happened to price, added together, rather than against one single number that represents "the bundle." If ACO ever priced more than one piece (an upcharge topping, say), that upcharge is taxed as its own ordinary line at whichever tax class it ended up with — the store default, unless ACO supplied its own `tax_class_id` for that piece — same rate and rounding rules as everything else — nothing about it being "part of a bundle" changes how it's taxed.
+
+### 6.3 What that means for shipping
+
+Shipping runs the same way: whatever Adobe Commerce's core shipping calculation would do with an ordinary set of quote items, it does here too, unmodified. Every scenario doc in this project exercises that path with `flatrate` shipping, which is what's been verified end to end so far.
+
+## 7. Shopping Cart Promotions
+
+Adobe Commerce's promotions engine (Cart Price Rules) runs untouched here too, the same way Tax and Shipping do (Section 6.1): nothing in this module plugs into it or overrides it. It evaluates each decomposed piece as its own ordinary quote item, the same as it would any standalone simple product, without any awareness of `items_group` or of the bundle those pieces came from.
