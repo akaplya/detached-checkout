@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
+use Psr\Log\LoggerInterface;
 
 class ConfigGetCommand extends Command
 {
@@ -25,14 +26,22 @@ class ConfigGetCommand extends Command
     private $scopeConfig;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param ScopeConfigInterface $scopeConfig
+     * @param LoggerInterface $logger
      * @param string|null $name
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
+        LoggerInterface $logger,
         ?string $name = null
     ) {
         $this->scopeConfig = $scopeConfig;
+        $this->logger = $logger;
         parent::__construct($name);
     }
 
@@ -118,6 +127,7 @@ class ConfigGetCommand extends Command
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
+            $this->logger->error('comopt:config:get failed', ['exception' => $e]);
             $output->writeln('<error>Failed to get configuration: ' . $e->getMessage() . '</error>');
             return Command::FAILURE;
         }

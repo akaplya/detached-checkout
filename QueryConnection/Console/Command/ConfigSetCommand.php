@@ -9,6 +9,7 @@ use CommerceOptimizer\QueryConnection\Model\AcoConfig;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Store\Model\ScopeInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -27,14 +28,22 @@ class ConfigSetCommand extends Command
     private $configWriter;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param WriterInterface $configWriter
+     * @param LoggerInterface $logger
      * @param string|null $name
      */
     public function __construct(
         WriterInterface $configWriter,
+        LoggerInterface $logger,
         ?string $name = null
     ) {
         $this->configWriter = $configWriter;
+        $this->logger = $logger;
         parent::__construct($name);
     }
 
@@ -117,6 +126,7 @@ class ConfigSetCommand extends Command
             );
             return Command::SUCCESS;
         } catch (\Exception $e) {
+            $this->logger->error('comopt:config:set failed', ['exception' => $e]);
             $output->writeln('<error>Failed to save configuration: ' . $e->getMessage() . '</error>');
             return Command::FAILURE;
         }

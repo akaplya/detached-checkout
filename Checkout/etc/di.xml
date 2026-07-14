@@ -6,36 +6,227 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Product Hydrator Interface preference - use composite by default -->
+    <preference for="CommerceOptimizer\Checkout\Model\ProductHydratorInterface" type="CommerceOptimizer\Checkout\Model\CompositeProductHydrator" />
+
+    <!-- Configure CompositeProductHydrator with specific hydrators -->
+    <type name="CommerceOptimizer\Checkout\Model\CompositeProductHydrator">
+        <arguments>
+            <argument name="hydrators" xsi:type="array">
+                <!-- Order matters: configurable first (more specific), then simple (fallback) -->
+                <item name="configurable" xsi:type="object">CommerceOptimizer\Checkout\Model\ConfigurableProductHydrator</item>
+                <item name="simple" xsi:type="object">CommerceOptimizer\Checkout\Model\SimpleProductHydrator</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Configure ConfigurableProductHydrator -->
+    <type name="CommerceOptimizer\Checkout\Model\ConfigurableProductHydrator">
+        <arguments>
+            <argument name="productFactory" xsi:type="object">Magento\Catalog\Model\ProductFactory</argument>
+            <argument name="config" xsi:type="object">Magento\Framework\App\Config\ScopeConfigInterface</argument>
+            <argument name="simpleProductHydrator" xsi:type="object">CommerceOptimizer\Checkout\Model\SimpleProductHydrator</argument>
+        </arguments>
+    </type>
+
+    <!-- Configure SimpleProductHydrator -->
+    <type name="CommerceOptimizer\Checkout\Model\SimpleProductHydrator">
+        <arguments>
+            <argument name="productFactory" xsi:type="object">Magento\Catalog\Model\ProductFactory</argument>
+            <argument name="config" xsi:type="object">Magento\Framework\App\Config\ScopeConfigInterface</argument>
+        </arguments>
+    </type>
+
+    <!--
+        Cart Item Type Resolver for simple and configurable products.
+        Intentionally a preference rather than a plugin: resolveType() runs once per cart item on every
+        cart query, and this resolver's logic short-circuits type resolution for CO items before falling
+        back to core. A preference lets the override skip the extra interceptor call stack (dispatch through
+        Interceptor::___callPlugins) on this hot path; a plugin was measured to add avoidable overhead here.
+        Ruled out per the decision hierarchy: only one preference can win on this class, but no other module
+        in this project targets it, so the collision risk is accepted for the performance gain.
+    -->
     <preference for="Magento\QuoteGraphQl\Model\Resolver\CartItemTypeResolver" type="CommerceOptimizer\Checkout\Plugin\QuoteGraphQl\Model\Resolver\CartItemTypeResolver" />
+
+    <!-- Plugin to pre-load products from Commerce Optimizer before adding to cart -->
     <type name="Magento\QuoteGraphQl\Model\Resolver\AddProductsToCart">
         <plugin name="pre-load-products" type="CommerceOptimizer\Checkout\Plugin\QuoteGraphQl\Model\Resolver\AddProductsToCart"/>
     </type>
+
+    <!-- Plugin for addConfigurableProductsToCart mutation -->
+    <type name="Magento\ConfigurableProductGraphQl\Model\Resolver\AddConfigurableProductsToCart">
+        <plugin name="pre-load-configurable-products" type="CommerceOptimizer\Checkout\Plugin\QuoteGraphQl\Model\Resolver\AddConfigurableProductsToCart"/>
+    </type>
+
+    <!-- Bundle integrity: remove -->
+    <type name="Magento\QuoteGraphQl\Model\Resolver\RemoveItemFromCart">
+        <plugin name="co-bundle-remove-integrity" type="CommerceOptimizer\Checkout\Plugin\QuoteGraphQl\Model\Resolver\RemoveItemFromCart"/>
+    </type>
+
+    <!-- Bundle integrity: update -->
+    <type name="Magento\QuoteGraphQl\Model\Resolver\UpdateCartItems">
+        <plugin name="co-bundle-update-integrity" type="CommerceOptimizer\Checkout\Plugin\QuoteGraphQl\Model\Resolver\UpdateCartItems"/>
+    </type>
+
     <type name="Magento\Catalog\Helper\Product">
         <plugin name="skip-saleable-check" type="CommerceOptimizer\Checkout\Plugin\Catalog\Model\Helper"/>
     </type>
+
     <type name="Magento\Quote\Model\Quote\Item">
         <plugin name="save-product-view" type="CommerceOptimizer\Checkout\Plugin\Quote\Model\Quote\Item"/>
     </type>
+
     <type name="Magento\Quote\Model\Cart\AddProductsToCart">
         <arguments>
             <argument name="productReader" xsi:type="object">CommerceOptimizer\Checkout\Plugin\Quote\Model\Cart\ProductReader</argument>
         </arguments>
     </type>
+
     <preference for="Magento\Quote\Model\ResourceModel\Quote\Item\Collection" type="CommerceOptimizer\Checkout\Plugin\Quote\Model\ResourceModel\Quote\Item\Collection" />
+
     <type name="Magento\Catalog\Model\Product">
-<!-- Prevents product from reloading during shopping cart rule processing -->
+        <!-- Prevents product from reloading during shopping cart rule processing -->
         <plugin name="avoid-load" type="CommerceOptimizer\Checkout\Plugin\Catalog\Model\Product"/>
     </type>
-<!--    \Magento\InventorySales\Plugin\Sales\OrderManagement\AppendReservationsAfterOrderPlacementPlugin-->
+
+    <!-- Disable inventory reservation for CO products -->
     <type name="Magento\Sales\Api\OrderManagementInterface">
         <plugin name="inventory_reservations_placement" disabled="true"/>
     </type>
     <type name="Magento\InventorySalesApi\Api\GetStockBySalesChannelInterface">
         <plugin name="adapt_stock_resolver_to_admin_website" disabled="true"/>
     </type>
+
+    <!-- Replace SuperAttributeDataProvider for configurable products from CO -->
+    <type name="Magento\QuoteGraphQl\Model\Cart\BuyRequest\BuyRequestBuilder">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="super_attribute" xsi:type="object">CommerceOptimizer\Checkout\Model\Cart\BuyRequest\SuperAttributeDataProvider</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Disable stock check for configurable products from CO -->
+    <type name="Magento\ConfigurableProductGraphQl\Model\Cart\BuyRequest\SuperAttributeDataProvider">
+        <plugin name="disable-co-stock-check" type="CommerceOptimizer\Checkout\Plugin\ConfigurableProductGraphQl\Model\Cart\BuyRequest\SuperAttributeDataProvider"/>
+    </type>
+
+    <!-- Configure ProductProvider with dependencies -->
     <type name="CommerceOptimizer\Checkout\Model\Http\ProductProvider">
         <arguments>
             <argument name="acoConfig" xsi:type="object">CommerceOptimizer\QueryConnection\Model\AcoConfig</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+        </arguments>
+    </type>
+
+    <!-- Configure ProductAssignProcessor with composite hydrator -->
+    <type name="CommerceOptimizer\Checkout\Plugin\Quote\Model\ResourceModel\Quote\Item\ProductAssignProcessor">
+        <arguments>
+            <argument name="productRegistry" xsi:type="object">CommerceOptimizer\Checkout\Model\ProductRegistry</argument>
+            <argument name="productHydrator" xsi:type="object">CommerceOptimizer\Checkout\Model\CompositeProductHydrator</argument>
+            <argument name="serializer" xsi:type="object">Magento\Framework\Serialize\Serializer\Json</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+        </arguments>
+    </type>
+
+    <!-- Configure SuperAttributeDataProvider for CO -->
+    <type name="CommerceOptimizer\Checkout\Model\Cart\BuyRequest\SuperAttributeDataProvider">
+        <arguments>
+            <argument name="arrayManagerFactory" xsi:type="object">Magento\Framework\Stdlib\ArrayManagerFactory</argument>
+            <argument name="productProvider" xsi:type="object">CommerceOptimizer\Checkout\Model\Http\ProductProvider</argument>
+            <argument name="productRegistry" xsi:type="object">CommerceOptimizer\Checkout\Model\ProductRegistry</argument>
+        </arguments>
+    </type>
+
+    <!-- Configure Quote Item plugin with composite hydrator, GroupManager, ResourceConnection, expiration config -->
+    <type name="CommerceOptimizer\Checkout\Plugin\Quote\Model\Quote\Item">
+        <arguments>
+            <argument name="productRegistry" xsi:type="object">CommerceOptimizer\Checkout\Model\ProductRegistry</argument>
+            <argument name="productHydrator" xsi:type="object">CommerceOptimizer\Checkout\Model\CompositeProductHydrator</argument>
+            <argument name="jsonSerializer" xsi:type="object">Magento\Framework\Serialize\Serializer\Json</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+            <argument name="groupManager" xsi:type="object">CommerceOptimizer\Checkout\Model\Bundle\GroupManager</argument>
+            <argument name="resourceConnection" xsi:type="object">Magento\Framework\App\ResourceConnection</argument>
+            <argument name="expirationConfig" xsi:type="object">CommerceOptimizer\Checkout\Model\Expiration\Config</argument>
+            <argument name="storeManager" xsi:type="object">Magento\Store\Model\StoreManagerInterface</argument>
+        </arguments>
+    </type>
+
+    <!-- Configure ExpirationProcessor dispatcher -->
+    <type name="CommerceOptimizer\Checkout\Model\Expiration\ExpirationProcessor">
+        <arguments>
+            <argument name="config" xsi:type="object">CommerceOptimizer\Checkout\Model\Expiration\Config</argument>
+            <argument name="storeManager" xsi:type="object">Magento\Store\Model\StoreManagerInterface</argument>
+            <argument name="deleteExpiredStrategy" xsi:type="object">CommerceOptimizer\Checkout\Model\Expiration\DeleteExpiredStrategy</argument>
+            <argument name="reloadExpiredStrategy" xsi:type="object">CommerceOptimizer\Checkout\Model\Expiration\ReloadExpiredStrategy</argument>
+            <argument name="warningExpiredStrategy" xsi:type="object">CommerceOptimizer\Checkout\Model\Expiration\WarningExpiredStrategy</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+        </arguments>
+    </type>
+
+    <!-- Configure ReloadExpiredStrategy with ACO re-fetch dependencies -->
+    <type name="CommerceOptimizer\Checkout\Model\Expiration\ReloadExpiredStrategy">
+        <arguments>
+            <argument name="productProvider" xsi:type="object">CommerceOptimizer\Checkout\Model\Http\ProductProvider</argument>
+            <argument name="productHydrator" xsi:type="object">CommerceOptimizer\Checkout\Model\CompositeProductHydrator</argument>
+            <argument name="productRegistry" xsi:type="object">CommerceOptimizer\Checkout\Model\ProductRegistry</argument>
+            <argument name="jsonSerializer" xsi:type="object">Magento\Framework\Serialize\Serializer\Json</argument>
+            <argument name="config" xsi:type="object">CommerceOptimizer\Checkout\Model\Expiration\Config</argument>
+            <argument name="resourceConnection" xsi:type="object">Magento\Framework\App\ResourceConnection</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+        </arguments>
+    </type>
+
+    <!-- Block order placement while the cart holds items expired under the "warning" strategy -->
+    <type name="Magento\QuoteGraphQl\Model\Cart\PlaceOrder">
+        <plugin name="co-block-expired-checkout" type="CommerceOptimizer\Checkout\Plugin\QuoteGraphQl\Model\Cart\PlaceOrder"/>
+    </type>
+
+    <!-- Configure ProductReader with composite hydrator -->
+    <type name="CommerceOptimizer\Checkout\Plugin\Quote\Model\Cart\ProductReader">
+        <arguments>
+            <argument name="productRegistry" xsi:type="object">CommerceOptimizer\Checkout\Model\ProductRegistry</argument>
+            <argument name="productProvider" xsi:type="object">CommerceOptimizer\Checkout\Model\Http\ProductProvider</argument>
+            <argument name="productHydrator" xsi:type="object">CommerceOptimizer\Checkout\Model\CompositeProductHydrator</argument>
+        </arguments>
+    </type>
+
+    <!-- Configure AddProductsToCart plugin with GroupManager, ResourceConnection, OptionDecoder -->
+    <type name="CommerceOptimizer\Checkout\Plugin\QuoteGraphQl\Model\Resolver\AddProductsToCart">
+        <arguments>
+            <argument name="productProvider" xsi:type="object">CommerceOptimizer\Checkout\Model\Http\ProductProvider</argument>
+            <argument name="productHydrator" xsi:type="object">CommerceOptimizer\Checkout\Model\CompositeProductHydrator</argument>
+            <argument name="productRegistry" xsi:type="object">CommerceOptimizer\Checkout\Model\ProductRegistry</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+            <argument name="groupManager" xsi:type="object">CommerceOptimizer\Checkout\Model\Bundle\GroupManager</argument>
+            <argument name="resourceConnection" xsi:type="object">Magento\Framework\App\ResourceConnection</argument>
+            <argument name="optionDecoder" xsi:type="object">CommerceOptimizer\Checkout\Model\Bundle\OptionDecoder</argument>
+        </arguments>
+    </type>
+
+    <!-- Configure AddConfigurableProductsToCart plugin with composite hydrator -->
+    <type name="CommerceOptimizer\Checkout\Plugin\QuoteGraphQl\Model\Resolver\AddConfigurableProductsToCart">
+        <arguments>
+            <argument name="productProvider" xsi:type="object">CommerceOptimizer\Checkout\Model\Http\ProductProvider</argument>
+            <argument name="productHydrator" xsi:type="object">CommerceOptimizer\Checkout\Model\CompositeProductHydrator</argument>
+            <argument name="productRegistry" xsi:type="object">CommerceOptimizer\Checkout\Model\ProductRegistry</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+        </arguments>
+    </type>
+
+    <!-- Configure RemoveItemFromCart bundle integrity plugin -->
+    <type name="CommerceOptimizer\Checkout\Plugin\QuoteGraphQl\Model\Resolver\RemoveItemFromCart">
+        <arguments>
+            <argument name="resourceConnection" xsi:type="object">Magento\Framework\App\ResourceConnection</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+        </arguments>
+    </type>
+
+    <!-- Configure UpdateCartItems bundle integrity plugin -->
+    <type name="CommerceOptimizer\Checkout\Plugin\QuoteGraphQl\Model\Resolver\UpdateCartItems">
+        <arguments>
+            <argument name="resourceConnection" xsi:type="object">Magento\Framework\App\ResourceConnection</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
         </arguments>
     </type>
 </config>

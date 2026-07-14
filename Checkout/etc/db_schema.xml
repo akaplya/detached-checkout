@@ -9,5 +9,23 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
     <table name="quote_item" resource="checkout" engine="innodb" comment="Sales Flat Quote Item">
         <column xsi:type="json" name="product_view" nullable="true" comment="Product View Model"/>
+        <column xsi:type="text" name="items_group" nullable="true" comment="Bundle group: comma-separated item_ids of all items sharing the same bundle (own item_id for non-bundle items)"/>
+        <column xsi:type="timestamp" name="expires_at" on_update="false" nullable="true" comment="Commerce Optimizer item expiration timestamp"/>
+    </table>
+
+    <table name="quote_item_group_info" resource="checkout" engine="innodb" comment="Parent product metadata for grouped quote items (one row per logical cart selection)">
+        <column xsi:type="int" name="id" unsigned="true" nullable="false" identity="true" comment="Row ID"/>
+        <column xsi:type="int" name="quote_id" unsigned="true" nullable="false" comment="Quote ID"/>
+        <column xsi:type="text" name="items_group" nullable="false" comment="Comma-separated item_ids that form this group (mirrors quote_item.items_group)"/>
+        <column xsi:type="varchar" name="parent_sku" nullable="false" length="255" comment="Parent bundle or configurable SKU"/>
+        <column xsi:type="varchar" name="product_type" nullable="false" length="32" comment="Product type: bundle or configurable"/>
+        <column xsi:type="json" name="selected_options" nullable="true" comment="Selected option value IDs as passed by the client"/>
+        <column xsi:type="json" name="product_view" nullable="true" comment="Parent product view retrieved from ACO"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <index referenceId="QUOTE_ITEM_GROUP_INFO_QUOTE_ID" indexType="btree">
+            <column name="quote_id"/>
+        </index>
     </table>
 </schema>

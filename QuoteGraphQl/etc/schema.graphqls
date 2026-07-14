@@ -1,0 +1,26 @@
+type CartItemImage @doc(description: "An image from an ACO product view.") {
+    url: String! @doc(description: "The URL of the image.")
+    label: String @doc(description: "The alt text label for the image.")
+}
+
+type CartItemGroupSelectedValue @doc(description: "A single selected value within a cart item group option.") {
+    label: String! @doc(description: "Display label of the selected value.")
+}
+
+type CartItemGroupSelectedOption @doc(description: "An option with one or more selected values for a cart item group.") {
+    label: String! @doc(description: "Display label of the option (e.g. Size, Crust).")
+    values: [CartItemGroupSelectedValue!]! @doc(description: "The values selected within this option.")
+}
+
+type CartItemGroup @doc(description: "Parent bundle or configurable product info sourced from ACO, shared across all items in a logical cart selection.") {
+    sku: String! @doc(description: "Parent product SKU.")
+    name: String! @doc(description: "Parent product name.")
+    image: CartItemImage @doc(description: "Parent product thumbnail image, if available from ACO.")
+    selected_options: [CartItemGroupSelectedOption!]! @doc(description: "Options selected for this cart item group, with resolved labels from the ACO product view.")
+}
+
+extend type SimpleCartItem {
+    aco_product_name: String @resolver(class: "CommerceOptimizer\\QuoteGraphQl\\Model\\Resolver\\CartItem\\AcoProductName") @doc(description: "Product name sourced from the ACO product view stored on the quote item.")
+    aco_product_image: CartItemImage @resolver(class: "CommerceOptimizer\\QuoteGraphQl\\Model\\Resolver\\CartItem\\AcoProductImage") @doc(description: "Product thumbnail image sourced from the ACO product view stored on the quote item.")
+    cart_item_group: CartItemGroup @resolver(class: "CommerceOptimizer\\QuoteGraphQl\\Model\\Resolver\\CartItem\\CartItemGroup") @doc(description: "Parent product group info for bundle or configurable cart items; null for standalone simple products.")
+}

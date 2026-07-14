@@ -5,6 +5,7 @@
  */
 namespace CommerceOptimizer\Checkout\Plugin\Quote\Model\ResourceModel\Quote\Item;
 
+use CommerceOptimizer\Checkout\Model\Expiration\ExpirationProcessor;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
@@ -17,10 +18,16 @@ class Collection extends \Magento\Quote\Model\ResourceModel\Quote\Item\Collectio
      */
     private $productAssignProcessor;
 
+    /**
+     * @var ExpirationProcessor
+     */
+    private $expirationProcessor;
+
     protected function _construct()
     {
         parent::_construct();
         $this->productAssignProcessor = ObjectManager::getInstance()->get(ProductAssignProcessor::class);
+        $this->expirationProcessor = ObjectManager::getInstance()->get(ExpirationProcessor::class);
     }
 
     protected function _assignProducts(): self
@@ -30,6 +37,9 @@ class Collection extends \Magento\Quote\Model\ResourceModel\Quote\Item\Collectio
         foreach ($this as $item) {
             /** @var ProductInterface $product */
             if ($this->productAssignProcessor->assignProduct($item)) {
+                $needRecollect = true;
+            }
+            if ($this->expirationProcessor->process($item)) {
                 $needRecollect = true;
             }
         };

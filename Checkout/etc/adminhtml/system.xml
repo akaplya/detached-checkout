@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright 2025 Adobe
+ * All Rights Reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="checkout">
+            <group id="cart_expiration" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Commerce Optimizer Cart Item Expiration</label>
+                <field id="length" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Expiration Length (minutes)</label>
+                    <comment>Number of minutes a Commerce Optimizer cart item remains valid before it is considered expired.</comment>
+                    <validate>validate-greater-than-zero validate-digits</validate>
+                </field>
+                <field id="strategy" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Expired Item Strategy</label>
+                    <comment>How to handle a Commerce Optimizer cart item once it expires.</comment>
+                    <source_model>CommerceOptimizer\Checkout\Model\Config\Source\ExpirationStrategy</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
